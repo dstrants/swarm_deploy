@@ -13,6 +13,8 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
+const Version = "0.1.0"
+
 func main() {
 	r := setupRouter()
 	r.Run(":8080")
