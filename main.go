@@ -25,6 +25,8 @@ func setupRouter() *gin.Engine {
 		var package_update github.GithubPackageWebhook
 		log.Info("New incoming webhook from github")
 		if c.ShouldBindBodyWith(&package_update, binding.JSON) == nil {
+
+			// HMAC challenge to verify that it's github that triggers the update
 			data, _ := json.Marshal(package_update)
 			result := github.CalculateHMAC(data, "supersecret")
 			header := c.Request.Header["X-Hub-Signature-256"][0]
