@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  bot:
+    image: ghcr.io/dstrants/with_coffee_go:0.2.0
+    deploy:
+      labels:
+        swarm_deploy: "true"
+      replicas: 0
