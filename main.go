@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	containers "swarm_deploy/lib/docker"
 	github "swarm_deploy/lib/github"
 
 	log "github.com/sirupsen/logrus"
@@ -32,6 +33,18 @@ func setupRouter() *gin.Engine {
 				c.JSON(http.StatusForbidden, gin.H{"status": "You are not authenticated"})
 				return
 			}
+
+			image, tag, err := containers.ParseImageName(package_update.Package.PackageVersion.PackageURL)
+
+			if err != nil {
+				log.WithFields(log.Fields{"image": package_update.Package.PackageVersion.PackageURL}).Error(err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.Package.PackageVersion.PackageURL})
+			}
+
+			// Spawns an async process to update the services.
+			// Responses just acknowledges the webhook so it won't be retried
+			go containers.UpdateAllServices(image, tag)
+
 			c.JSON(http.StatusCreated, gin.H{"status": "Thanks for the heads up :)"})
 
 		} else {
