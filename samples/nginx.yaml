@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  server:
+    image: nginx:latest
+    deploy:
+      labels:
+        swarm_deploy: "true"
