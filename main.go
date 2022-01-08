@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"swarm_deploy/lib/config"
 	containers "swarm_deploy/lib/docker"
-	github "swarm_deploy/lib/github"
+	"swarm_deploy/lib/github"
 
 	log "github.com/sirupsen/logrus"
 
@@ -19,6 +20,8 @@ func main() {
 
 func setupRouter() *gin.Engine {
 
+	cnf := config.LoadConfig()
+
 	r := gin.Default()
 
 	r.POST("webhook/github", func(c *gin.Context) {
@@ -28,7 +31,7 @@ func setupRouter() *gin.Engine {
 
 			// HMAC challenge to verify that it's github that triggers the update
 			data, _ := json.Marshal(package_update)
-			result := github.CalculateHMAC(data, "supersecret")
+			result := github.CalculateHMAC(data, cnf.GithubWebhookSecret)
 			header := c.Request.Header["X-Hub-Signature-256"][0]
 			if "sha256="+result != header {
 				log.WithFields(log.Fields{"incoming": header, "computed": "sha256=" + result}).Error("Authentication failed.")
