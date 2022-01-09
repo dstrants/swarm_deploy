@@ -1,1 +1,4 @@
 samples/
+.github/
+.deepsource.toml
+readme.md
