@@ -6,7 +6,6 @@ Current implementation is very simple and just deploys the image as is.
 
 ## Deploy in swarm as a service
 
-
 ```yaml
 # swarm_deploy.yml
 version: '3.8'
@@ -30,11 +29,19 @@ Then run the command deploy to deploy the service to you cluster
 docker stack deploy -c swarm_deploy.yml swarm_deploy
 ```
 
-## TODO
+### Full Configuration
 
-- [] Add regex filters as deploy labels to filter what out images tags
-- [] Adds webhook endpoint for dockerhub
-- [] Add protected endpoint for manual triggering.
-- [] Slack notifications
-- [] Improve documentation
-- [] Add code related ci tools (linting, etc)
+Name | Default | Description
+-----|---------|------------
+`WEBSERVER_HOST` | "" | The hostname that webserver will be listening to.
+`WEBSERVER_PORT` | 8080 | The port that webserver will be listening to.
+`GITHUB_WEBHOOK_SECRET` | None but **required** | The secret that github webhooks will use to produce the HMAC sha. Should be the same in all webhooks or call will be rejected.
+
+
+## TODO
+- [x] ~Add code related ci tools (linting, etc)~
+- [ ] Add regex filters as deploy labels to filter what out images tags
+- [ ] Adds webhook endpoint for dockerhub
+- [ ] Add protected endpoint for manual triggering.
+- [ ] Slack notifications
+- [ ] Improve documentation
