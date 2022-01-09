@@ -3,8 +3,8 @@ package github
 import "time"
 
 type GithubPackageWebhook struct {
-	Action  string `json:"action"`
-	Package struct {
+	Action          string `json:"action"`
+	RegistryPackage struct {
 		ID          int       `json:"id"`
 		Name        string    `json:"name"`
 		Namespace   string    `json:"namespace"`
@@ -35,11 +35,72 @@ type GithubPackageWebhook struct {
 			SiteAdmin         bool   `json:"site_admin"`
 		} `json:"owner"`
 		PackageVersion struct {
-			ID                int           `json:"id"`
-			Version           string        `json:"version"`
-			Name              string        `json:"name"`
-			Description       string        `json:"description"`
-			Summary           string        `json:"summary"`
+			ID          int    `json:"id"`
+			Version     string `json:"version"`
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Summary     string `json:"summary"`
+			Body        struct {
+				Repository struct {
+					Repository struct {
+						ID                    int         `json:"id"`
+						Name                  string      `json:"name"`
+						OwnerID               int         `json:"owner_id"`
+						ParentID              interface{} `json:"parent_id"`
+						Sandbox               interface{} `json:"sandbox"`
+						UpdatedAt             time.Time   `json:"updated_at"`
+						CreatedAt             time.Time   `json:"created_at"`
+						Public                bool        `json:"public"`
+						Description           string      `json:"description"`
+						Homepage              interface{} `json:"homepage"`
+						SourceID              int         `json:"source_id"`
+						PublicPush            interface{} `json:"public_push"`
+						DiskUsage             int         `json:"disk_usage"`
+						Locked                bool        `json:"locked"`
+						PushedAt              time.Time   `json:"pushed_at"`
+						WatcherCount          int         `json:"watcher_count"`
+						PublicForkCount       int         `json:"public_fork_count"`
+						PrimaryLanguageNameID int         `json:"primary_language_name_id"`
+						HasIssues             bool        `json:"has_issues"`
+						HasWiki               bool        `json:"has_wiki"`
+						HasDownloads          bool        `json:"has_downloads"`
+						RawData               struct {
+							Data struct {
+								CreatedByUserID          int           `json:"created_by_user_id"`
+								PrimaryLanguageName      string        `json:"primary_language_name"`
+								CompletedOnboardingTasks []interface{} `json:"completed_onboarding_tasks"`
+							} `json:"data"`
+						} `json:"raw_data"`
+						OrganizationID    interface{} `json:"organization_id"`
+						DisabledAt        interface{} `json:"disabled_at"`
+						DisabledBy        interface{} `json:"disabled_by"`
+						DisablingReason   interface{} `json:"disabling_reason"`
+						HealthStatus      interface{} `json:"health_status"`
+						PushedAtUsec      int         `json:"pushed_at_usec"`
+						Active            bool        `json:"active"`
+						ReflogSyncEnabled bool        `json:"reflog_sync_enabled"`
+						MadePublicAt      time.Time   `json:"made_public_at"`
+						UserHidden        int         `json:"user_hidden"`
+						Maintained        bool        `json:"maintained"`
+						Template          bool        `json:"template"`
+						OwnerLogin        string      `json:"owner_login"`
+						WorldWritableWiki bool        `json:"world_writable_wiki"`
+						RefsetUpdatedAt   time.Time   `json:"refset_updated_at"`
+						PropertiesVersion int         `json:"properties_version"`
+						DisablingDetail   interface{} `json:"disabling_detail"`
+					} `json:"repository"`
+				} `json:"repository"`
+				Info struct {
+					Type       string      `json:"type"`
+					Oid        string      `json:"oid"`
+					Mode       int         `json:"mode"`
+					Name       string      `json:"name"`
+					Path       string      `json:"path"`
+					Size       interface{} `json:"size"`
+					Collection bool        `json:"collection"`
+				} `json:"info"`
+				Formatted bool `json:"_formatted"`
+			} `json:"body"`
 			HTMLURL           string        `json:"html_url"`
 			TargetCommitish   string        `json:"target_commitish"`
 			TargetOid         string        `json:"target_oid"`
@@ -85,7 +146,7 @@ type GithubPackageWebhook struct {
 			URL      string `json:"url"`
 			Vendor   string `json:"vendor"`
 		} `json:"registry"`
-	} `json:"package"`
+	} `json:"registry_package"`
 	Repository struct {
 		ID       int    `json:"id"`
 		NodeID   string `json:"node_id"`
@@ -113,7 +174,7 @@ type GithubPackageWebhook struct {
 			SiteAdmin         bool   `json:"site_admin"`
 		} `json:"owner"`
 		HTMLURL          string        `json:"html_url"`
-		Description      interface{}   `json:"description"`
+		Description      string        `json:"description",omitempty`
 		Fork             bool          `json:"fork"`
 		URL              string        `json:"url"`
 		ForksURL         string        `json:"forks_url"`
