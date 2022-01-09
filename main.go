@@ -42,11 +42,11 @@ func setupRouter() *gin.Engine {
 				return
 			}
 
-			image, tag, err := containers.ParseImageName(package_update.Package.PackageVersion.PackageURL)
+			image, tag, err := containers.ParseImageName(package_update.RegistryPackage.PackageVersion.PackageURL)
 
 			if err != nil {
-				log.WithFields(log.Fields{"image": package_update.Package.PackageVersion.PackageURL}).Error(err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.Package.PackageVersion.PackageURL})
+				log.WithFields(log.Fields{"image": package_update.RegistryPackage.PackageVersion.PackageURL}).Error(err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.RegistryPackage.PackageVersion.PackageURL})
 			}
 
 			// Spawns an async process to update the services.
