@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
-const Version = "0.1.0"
+const Version = "0.1.1"
 
 var cnf = config.LoadConfig()
 
