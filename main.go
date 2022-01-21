@@ -15,7 +15,7 @@ import (
 	"github.com/google/go-github/v42/github"
 )
 
-const Version = "0.1.1"
+const Version = "0.2.0"
 
 var cnf = config.LoadConfig()
 

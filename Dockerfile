@@ -1,7 +1,7 @@
 ARG GOLANG_VERSION=1.17
 FROM golang:${GOLANG_VERSION} AS builder
 
-LABEL VERSION="0.1.1"
+LABEL VERSION="0.2.0"
 LABEL org.opencontainers.image.description "Simple CD tool for docker swarm"
 RUN apt-get -qq update && apt-get -yqq install upx
 
