@@ -1,6 +1,10 @@
 package config
 
-import env "github.com/Netflix/go-env"
+import (
+	"strings"
+
+	env "github.com/Netflix/go-env"
+)
 
 type Config struct {
 	// Gin Webserver configuration
@@ -11,6 +15,13 @@ type Config struct {
 	// Github Related Configuration
 	Github struct {
 		WebhookSecret string `env:"GITHUB_WEBHOOK_SECRET,required=true"`
+		WebhookEvents string `env:"GITHUB_WEBHOOK_EVENTS,default=package,ping"`
 	}
 	Extras env.EnvSet
+}
+
+func (c Config) GithubWebhookEvents() []string {
+	AcceptedEvents := strings.Split(c.Github.WebhookEvents, ",")
+
+	return AcceptedEvents
 }
