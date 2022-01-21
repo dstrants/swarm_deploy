@@ -21,9 +21,7 @@ type Config struct {
 }
 
 func (c Config) GithubWebhookEvents() []string {
-	var AcceptedEvents []string
-
-	AcceptedEvents = strings.Split(c.Github.WebhookEvents, ",")
+	AcceptedEvents := strings.Split(c.Github.WebhookEvents, ",")
 
 	return AcceptedEvents
 }
