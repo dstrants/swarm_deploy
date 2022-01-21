@@ -1,22 +1,66 @@
 package main
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"swarm_deploy/lib/config"
 	containers "swarm_deploy/lib/docker"
-	"swarm_deploy/lib/github"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/google/go-github/v42/github"
 )
 
 const Version = "0.1.1"
 
 var cnf = config.LoadConfig()
+
+func WebhookTypeChecker() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var headers http.Header
+		var AcceptedEventTypes []string
+
+		log.Info(headers)
+		AcceptedEventTypes = append(AcceptedEventTypes, "package")
+
+		headers = c.Request.Header
+
+		eventType, ok := headers["X-Github-Event"]
+
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{"message": "UnprocessableEntity"})
+		}
+
+		for _, event := range AcceptedEventTypes {
+			if event == eventType[0] {
+				return
+			}
+		}
+
+		log.WithFields(log.Fields{"field": eventType[0]}).Error("Event not in the list of accepted events")
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{"message": "UnprocessableEntity"})
+	}
+}
+
+func WebhookSignatureValidator() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		req := c.Copy()
+
+		payload, err := github.ValidatePayload(req.Request, []byte(cnf.Github.WebhookSecret))
+		if err != nil {
+			log.Error(err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Unauthorized"})
+			return
+		}
+
+		c.Request.Body = io.NopCloser(bytes.NewBuffer(payload))
+		c.Next()
+	}
+}
 
 func main() {
 	r := setupRouter()
@@ -27,26 +71,19 @@ func setupRouter() *gin.Engine {
 
 	r := gin.Default()
 
+	r.Use(WebhookTypeChecker())
+	r.Use(WebhookSignatureValidator())
+
 	r.POST("webhook/github", func(c *gin.Context) {
-		var package_update github.GithubPackageWebhook
+		var package_update github.PackageEvent
 		log.Info("New incoming webhook from github")
-		if c.ShouldBindBodyWith(&package_update, binding.JSON) == nil {
-
-			// HMAC challenge to verify that it's github that triggers the update
-			data, _ := json.Marshal(package_update)
-			result := github.CalculateHMAC(data, cnf.Github.WebhookSecret)
-			header := c.Request.Header["X-Hub-Signature-256"][0]
-			if "sha256="+result != header {
-				log.WithFields(log.Fields{"incoming": header, "computed": "sha256=" + result}).Error("Authentication failed.")
-				c.JSON(http.StatusForbidden, gin.H{"status": "You are not authenticated"})
-				return
-			}
-
-			image, tag, err := containers.ParseImageName(package_update.RegistryPackage.PackageVersion.PackageURL)
+		if e := c.ShouldBindBodyWith(&package_update, binding.JSON); e == nil {
+			log.Info(package_update)
+			image, tag, err := containers.ParseImageName(*package_update.Package.PackageVersion.URL)
 
 			if err != nil {
-				log.WithFields(log.Fields{"image": package_update.RegistryPackage.PackageVersion.PackageURL}).Error(err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.RegistryPackage.PackageVersion.PackageURL})
+				log.WithFields(log.Fields{"image": package_update.Package.PackageVersion.URL}).Error(err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.Package.PackageVersion.URL})
 			}
 
 			// Spawns an async process to update the services.
@@ -56,6 +93,7 @@ func setupRouter() *gin.Engine {
 			c.JSON(http.StatusCreated, gin.H{"status": "Thanks for the heads up :)"})
 
 		} else {
+			log.Error(e)
 			c.JSON(http.StatusBadRequest, gin.H{"status": "Bad Request"})
 		}
 		return
