@@ -94,7 +94,6 @@ func setupRouter() *gin.Engine {
 			log.Error(e)
 			c.JSON(http.StatusBadRequest, gin.H{"status": "Bad Request"})
 		}
-		return
 	})
 
 	r.GET("/ping", func(c *gin.Context) {
