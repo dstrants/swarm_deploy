@@ -22,10 +22,8 @@ var cnf = config.LoadConfig()
 func WebhookTypeChecker() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var headers http.Header
-		var AcceptedEventTypes []string
 
 		log.Info(headers)
-		AcceptedEventTypes = append(AcceptedEventTypes, "package")
 
 		headers = c.Request.Header
 
@@ -35,7 +33,7 @@ func WebhookTypeChecker() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{"message": "UnprocessableEntity"})
 		}
 
-		for _, event := range AcceptedEventTypes {
+		for _, event := range cnf.GithubWebhookEvents() {
 			if event == eventType[0] {
 				return
 			}
