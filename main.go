@@ -73,8 +73,22 @@ func setupRouter() *gin.Engine {
 	r.Use(WebhookSignatureValidator())
 
 	r.POST("webhook/github", func(c *gin.Context) {
-		var package_update github.PackageEvent
 		log.Info("New incoming webhook from github")
+		eventType := c.Request.Header["X-Github-Event"][0]
+
+		if eventType == "ping" {
+			var ping github.PingEvent
+			if e := c.ShouldBindBodyWith(&ping, binding.JSON); e == nil {
+				log.WithFields(log.Fields{"ping": ping}).Debug("Received an ping event")
+				c.JSON(http.StatusOK, gin.H{"status": "Hello github!"})
+			} else {
+				log.Error(e)
+				c.JSON(http.StatusBadRequest, gin.H{"status": "Bad Request"})
+			}
+			return
+		}
+
+		var package_update github.PackageEvent
 		if e := c.ShouldBindBodyWith(&package_update, binding.JSON); e == nil {
 			log.Info(package_update)
 			image, tag, err := containers.ParseImageName(*package_update.Package.PackageVersion.URL)

@@ -15,7 +15,7 @@ type Config struct {
 	// Github Related Configuration
 	Github struct {
 		WebhookSecret string `env:"GITHUB_WEBHOOK_SECRET,required=true"`
-		WebhookEvents string `env:"GITHUB_WEBHOOK_EVENTS,default=package"`
+		WebhookEvents string `env:"GITHUB_WEBHOOK_EVENTS,default=package,ping"`
 	}
 	Extras env.EnvSet
 }
