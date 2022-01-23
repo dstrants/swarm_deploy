@@ -24,10 +24,7 @@ func WebhookTypeChecker() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var headers http.Header
 
-		log.Info(headers)
-
 		headers = c.Request.Header
-
 		eventType, ok := headers["X-Github-Event"]
 
 		if !ok {

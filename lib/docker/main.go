@@ -87,7 +87,8 @@ func UpdateAllServices(image, tag string) {
 	services := LocateServices(image)
 
 	if len(services) == 0 {
-		log.WithFields(log.Fields{"image": image}).Info("No services found for the given image.")
+		log.WithFields(log.Fields{"image": image}).Warning("No services found for the given image.")
+		return
 	}
 
 	full_image := fmt.Sprintf("%s:%s", image, tag)
