@@ -22,9 +22,7 @@ var cnf = config.LoadConfig()
 
 func WebhookTypeChecker() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var headers http.Header
-
-		headers = c.Request.Header
+		headers := c.Request.Header
 		eventType, ok := headers["X-Github-Event"]
 
 		if !ok {
@@ -88,7 +86,7 @@ func setupRouter() *gin.Engine {
 
 		var package_update githubModels.PackageEvent
 		if e := c.ShouldBindBodyWith(&package_update, binding.JSON); e == nil {
-			image, tag, err := containers.ParseImageName(*&package_update.Package.PackageVersion.PackageURL)
+			image, tag, err := containers.ParseImageName(package_update.Package.PackageVersion.PackageURL)
 
 			if err != nil {
 				log.WithFields(log.Fields{"image": package_update.Package.PackageVersion.PackageURL}).Error(err)
