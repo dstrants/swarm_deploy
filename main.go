@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"swarm_deploy/lib/config"
 	containers "swarm_deploy/lib/docker"
+	githubModels "swarm_deploy/lib/github"
 
 	log "github.com/sirupsen/logrus"
 
@@ -15,18 +16,13 @@ import (
 	"github.com/google/go-github/v42/github"
 )
 
-const Version = "0.2.0"
+const Version = "0.2.1"
 
 var cnf = config.LoadConfig()
 
 func WebhookTypeChecker() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var headers http.Header
-
-		log.Info(headers)
-
-		headers = c.Request.Header
-
+		headers := c.Request.Header
 		eventType, ok := headers["X-Github-Event"]
 
 		if !ok {
@@ -88,14 +84,13 @@ func setupRouter() *gin.Engine {
 			return
 		}
 
-		var package_update github.PackageEvent
+		var package_update githubModels.PackageEvent
 		if e := c.ShouldBindBodyWith(&package_update, binding.JSON); e == nil {
-			log.Info(package_update)
-			image, tag, err := containers.ParseImageName(*package_update.Package.PackageVersion.URL)
+			image, tag, err := containers.ParseImageName(package_update.Package.PackageVersion.PackageURL)
 
 			if err != nil {
-				log.WithFields(log.Fields{"image": package_update.Package.PackageVersion.URL}).Error(err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.Package.PackageVersion.URL})
+				log.WithFields(log.Fields{"image": package_update.Package.PackageVersion.PackageURL}).Error(err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.Package.PackageVersion.PackageURL})
 			}
 
 			// Spawns an async process to update the services.
