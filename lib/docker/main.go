@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"swarm_deploy/lib/slack"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/docker/docker/api/types/swarm"
@@ -97,6 +99,7 @@ func UpdateAllServices(image, tag string) {
 		result := UpdateServiceImage(service, full_image)
 
 		if result {
+			slack.SendSimpleMessage(fmt.Sprintf("Service `%s` has been deployed with image `%s`", service.Spec.Name, full_image))
 			log.WithFields(log.Fields{"service": service.Spec.Name, "image": full_image}).Info("Service image updated")
 		}
 	}
