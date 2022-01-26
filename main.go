@@ -21,6 +21,14 @@ const Version = "0.2.3"
 
 var cnf = config.LoadConfig()
 
+// Removes line endings from user input field
+func escapeInputField(field string) string {
+	escapedField := strings.Replace(field, "\n", "", -1)
+	escapedField = strings.Replace(escapedField, "\r", "", -1)
+
+	return escapedField
+}
+
 func WebhookTypeChecker() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		headers := c.Request.Header
@@ -35,8 +43,7 @@ func WebhookTypeChecker() gin.HandlerFunc {
 				return
 			}
 		}
-		escapedEvent := strings.Replace(eventType[0], "\n", "", -1)
-		escapedEvent = strings.Replace(escapedEvent, "\r", "", -1)
+		escapedEvent := escapeInputField(eventType[0])
 
 		log.WithFields(log.Fields{"event": escapedEvent}).Error("Event not in the list of accepted events")
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{"message": "UnprocessableEntity"})
@@ -89,8 +96,7 @@ func setupRouter() *gin.Engine {
 
 		var package_update githubModels.PackageEvent
 		if e := c.ShouldBindBodyWith(&package_update, binding.JSON); e == nil {
-			escapedImage := strings.Replace(package_update.Package.PackageVersion.PackageURL, "\n", "", -1)
-			escapedImage = strings.Replace(escapedImage, "\r", "", -1)
+			escapedImage := escapeInputField(package_update.Package.PackageVersion.PackageURL)
 			image, tag, err := containers.ParseImageName(escapedImage)
 
 			if err != nil {
