@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"swarm_deploy/lib/config"
 	containers "swarm_deploy/lib/docker"
 	githubModels "swarm_deploy/lib/github"
@@ -86,11 +87,13 @@ func setupRouter() *gin.Engine {
 
 		var package_update githubModels.PackageEvent
 		if e := c.ShouldBindBodyWith(&package_update, binding.JSON); e == nil {
-			image, tag, err := containers.ParseImageName(package_update.Package.PackageVersion.PackageURL)
+			escapedImage := strings.Replace(package_update.Package.PackageVersion.PackageURL, "\n", "", -1)
+			escapedImage = strings.Replace(escapedImage, "\r", "", -1)
+			image, tag, err := containers.ParseImageName(escapedImage)
 
 			if err != nil {
-				log.WithFields(log.Fields{"image": package_update.Package.PackageVersion.PackageURL}).Error(err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.Package.PackageVersion.PackageURL})
+				log.WithFields(log.Fields{"image": escapedImage}).Error(err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": escapedImage})
 			}
 
 			// Spawns an async process to update the services.
