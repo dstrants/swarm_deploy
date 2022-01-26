@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"swarm_deploy/lib/config"
 	containers "swarm_deploy/lib/docker"
 	githubModels "swarm_deploy/lib/github"
@@ -16,9 +17,17 @@ import (
 	"github.com/google/go-github/v42/github"
 )
 
-const Version = "0.2.2"
+const Version = "0.2.3"
 
 var cnf = config.LoadConfig()
+
+// Removes line endings from user input field
+func escapeInputField(field string) string {
+	escapedField := strings.Replace(field, "\n", "", -1)
+	escapedField = strings.Replace(escapedField, "\r", "", -1)
+
+	return escapedField
+}
 
 func WebhookTypeChecker() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -34,8 +43,9 @@ func WebhookTypeChecker() gin.HandlerFunc {
 				return
 			}
 		}
+		escapedEvent := escapeInputField(eventType[0])
 
-		log.WithFields(log.Fields{"field": eventType[0]}).Error("Event not in the list of accepted events")
+		log.WithFields(log.Fields{"event": escapedEvent}).Error("Event not in the list of accepted events")
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{"message": "UnprocessableEntity"})
 	}
 }
@@ -75,7 +85,7 @@ func setupRouter() *gin.Engine {
 		if eventType == "ping" {
 			var ping github.PingEvent
 			if e := c.ShouldBindBodyWith(&ping, binding.JSON); e == nil {
-				log.WithFields(log.Fields{"ping": ping}).Debug("Received an ping event")
+				log.Debug("Received an ping event")
 				c.JSON(http.StatusOK, gin.H{"status": "Hello github!"})
 			} else {
 				log.Error(e)
@@ -86,11 +96,12 @@ func setupRouter() *gin.Engine {
 
 		var package_update githubModels.PackageEvent
 		if e := c.ShouldBindBodyWith(&package_update, binding.JSON); e == nil {
-			image, tag, err := containers.ParseImageName(package_update.Package.PackageVersion.PackageURL)
+			escapedImage := escapeInputField(package_update.Package.PackageVersion.PackageURL)
+			image, tag, err := containers.ParseImageName(escapedImage)
 
 			if err != nil {
-				log.WithFields(log.Fields{"image": package_update.Package.PackageVersion.PackageURL}).Error(err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": package_update.Package.PackageVersion.PackageURL})
+				log.WithFields(log.Fields{"image": escapedImage}).Error(err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image could not be parsed", "image": escapedImage})
 			}
 
 			// Spawns an async process to update the services.
