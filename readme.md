@@ -36,6 +36,8 @@ Name | Default | Description
 `WEBSERVER_HOST` | "" | The hostname that webserver will be listening to.
 `WEBSERVER_PORT` | 8080 | The port that webserver will be listening to.
 `GITHUB_WEBHOOK_SECRET` | None but **required** | The secret that github webhooks will use to produce the HMAC sha. Should be the same in all webhooks or call will be rejected.
+`SLACK_TOKEN` | **required** | The slack app token to deliver notifications.
+`SLACK_CHANNEL` | `infra` | The slack channel that notifications will be delivered to.
 
 
 ## TODO
