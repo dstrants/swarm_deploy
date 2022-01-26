@@ -45,8 +45,8 @@ Name | Default | Description
 
 ## TODO
 - [x] ~Add code related ci tools (linting, etc)~
-- [ ] Add regex filters as deploy labels to filter what out images tags
+- [x] Slack notifications
+- [ ] Add regex filters as deploy labels to filter out images tags
 - [ ] Adds webhook endpoint for dockerhub
 - [ ] Add protected endpoint for manual triggering.
-- [ ] Slack notifications
 - [ ] Improve documentation
