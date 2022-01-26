@@ -20,7 +20,7 @@ type Config struct {
 
 	Slack struct {
 		Token   string `env:"SLACK_TOKEN,required=true"`
-		Channel string `env:"SLACK_CHANNEL,default=news"`
+		Channel string `env:"SLACK_CHANNEL,default=infra"`
 	}
 
 	Extras env.EnvSet
