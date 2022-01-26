@@ -35,8 +35,10 @@ func WebhookTypeChecker() gin.HandlerFunc {
 				return
 			}
 		}
+		escapedEvent := strings.Replace(eventType[0], "\n", "", -1)
+		escapedEvent = strings.Replace(escapedEvent, "\r", "", -1)
 
-		log.WithFields(log.Fields{"field": eventType[0]}).Error("Event not in the list of accepted events")
+		log.WithFields(log.Fields{"event": escapedEvent}).Error("Event not in the list of accepted events")
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{"message": "UnprocessableEntity"})
 	}
 }
