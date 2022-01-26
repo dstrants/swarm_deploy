@@ -17,6 +17,8 @@ services:
             GIN_MODE: release
             # You have to set this on the github side as well
             GITHUB_WEBHOOK_SECRET: supersecretpass
+            SLACK_TOKEN: extrasupersecret
+
         deploy:
             replicas: 1
         image: ghcr.io/dstrants/swarm_deploy:latest
